@@ -40,9 +40,8 @@ beats = beats.delete(str_index);
 handles.beats = beats;  % update beats in handles
 guidata(hObject, handles);
 
-listbox_beats = beats_to_listbox(beats.Q, beats.QRS, beats.S, beats.Tend);
+listbox_beats = beats_to_listbox(beats.P, beats.Q, beats.QRS, beats.S, beats.Tend);
 set(handles.activebeats_list,'String',listbox_beats);
-
     
 % Finds outliers 
     beats = beats.find_outliers(vcg,aps);

@@ -97,6 +97,11 @@ set(handles.qrs_txt,'String',0);
 set(handles.jt_txt,'String',0);
 set(handles.qt_txt,'String',0);
 
+set(handles.pr_median_txt,'String',0);
+set(handles.pr_min_txt,'String',0);
+set(handles.pr_max_txt,'String',0);
+set(handles.pr_iqr_txt,'String',0);
+
 set(handles.qrs_median_txt,'String',0);
 set(handles.qrs_min_txt,'String',0);
 set(handles.qrs_max_txt,'String',0);

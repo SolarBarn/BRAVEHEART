@@ -44,7 +44,7 @@ function varargout = braveheart_gui(varargin)
 
 % Edit the above text to modify the response to help braveheart_gui
 
-% Last Modified by GUIDE v2.5 11-Sep-2024 13:17:11
+% Last Modified by GUIDE v2.5 01-Nov-2024 09:15:54
 
 % Update the current L&F for mac button issues...
 % Windows will use the normal Windows theme
@@ -73,7 +73,6 @@ else
     gui_mainfcn(gui_State, varargin{:});
 end
 % End initialization code - DO NOT EDIT
-
 
 % --- Executes just before braveheart_gui is made visible.
 function braveheart_gui_OpeningFcn(hObject, eventdata, handles, varargin)
@@ -159,7 +158,7 @@ if ismac
 end
 
 % Show About Information regarding License etc
-about_help_button_Callback(hObject, eventdata, handles)
+%about_help_button_Callback(hObject, eventdata, handles)
 
 % UIWAIT makes braveheart_gui wait for user response (see UIRESUME)
 % uiwait(handles.braveheart_gui);
@@ -194,9 +193,8 @@ function filename_txt_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+   set(hObject,'BackgroundColor','white');
 end
-
 
 % --- Executes on button press in load_button.
 function load_button_Callback(hObject, eventdata, handles)
@@ -846,7 +844,7 @@ if aps.debug
 end
  
 % Run batch_calc
-% This time dont recalc HR as this wont change
+% This time don't recalc HR as this wont change
 [~, ~, handles.beats, handles.quality, handles.correlation_test, handles.median_vcg, ...
     handles.beatsig_vcg, handles.median_12L, handles.beatsig_12L, handles.medianbeat, handles.beat_stats, ...
     handles.ecg_raw, handles.vcg_raw, handles.ecg, handles.vcg, handles.noise, ~] = batch_calc(handles.ecg_raw, [], [], [], [], [], aps, qps, 0, "", []);
@@ -937,8 +935,6 @@ end
 % Update handles structure
 guidata(hObject, handles);
 
-
-
 % --- Executes on selection change in activebeats_list.
 function activebeats_list_Callback(hObject, eventdata, handles)
 % hObject    handle to activebeats_list (see GCBO)
@@ -1022,25 +1018,26 @@ str_index = get(handles.activebeats_list,'Value');
 % text box
 set(handles.edit_selectedbeat_textbox,'String',str_matrix(str_index,:))
 
-% Obtain the fiducial points (Qon, Rpk, Qoff, Toff) for the selected beat
-x1 = beatmatrix(str_index,1); %qon
-rpeak = beatmatrix(str_index,2); %rpeak
-x3 = beatmatrix(str_index,3); %qoff
-x4 = beatmatrix(str_index,4); %toff
+% Obtain the fiducial points (Ppk, Qon, Rpk, Qoff, Toff) for the selected beat
+x1 = beatmatrix(str_index,1); %ppeak
+x2 = beatmatrix(str_index,2); %qon
+rpeak = beatmatrix(str_index,3); %rpeak
+x4 = beatmatrix(str_index,4); %qoff
+x5 = beatmatrix(str_index,5); %toff
 
 % Guesses for plotting if some data is missing to avoid errors
-if isnan(x1); x1 = rpeak - aps.QRwidth*vcg.freq/1000; end
-if isnan(x3); x3 = rpeak + aps.QRwidth*vcg.freq/1000; end
-if isnan(x4)
+if isnan(x2); x2 = rpeak - aps.QRwidth*vcg.freq/1000; end
+if isnan(x4); x4 = rpeak + aps.QRwidth*vcg.freq/1000; end
+if isnan(x5)
     rravg = length(VM) / size(beatmatrix, 1);
     stend = aps.STend;
     st = rravg * stend/100;
-    x4 = x3 + st;
+    x5 = x4 + st;
 end 
 
 % Set Y axis limits based on the beat
-y1 = min(VM(x1:x4))-0.1*(max(VM(x1:x4))-min(VM(x1:x4)));
-y2 = max(VM(x1:x4))+0.1*(max(VM(x1:x4))-min(VM(x1:x4)));
+y1 = min(VM(x2:x5))-0.1*(max(VM(x2:x5))-min(VM(x2:x5)));
+y2 = max(VM(x2:x5))+0.1*(max(VM(x2:x5))-min(VM(x2:x5)));
 
 % Clear selected beat axis
 cla(handles.selectedbeat_axis) 
@@ -1053,19 +1050,23 @@ set(gca,'YTick',[])
 hold on
 
 % Draw the fiducial point lines in the selected beat viewer
-qon_line = line([x1 x1],[y2 y1], 'color', 'k','linewidth',0.5, 'linestyle', '--'); %qon line
-qoff_line = line([x3 x3],[y2 y1], 'color', 'b','linewidth',0.5, 'linestyle', '--'); %qoff line
-toff_line = line([x4 x4],[y2 y1], 'color', 'r','linewidth',0.5, 'linestyle', '--'); %toff line
+ppeak_line = line([x1 x1],[y2 y1], 'color', 'k','linewidth',0.5, 'linestyle', '--'); %Ppk line
+qon_line = line([x2 x2],[y2 y1], 'color', 'k','linewidth',0.5, 'linestyle', '--'); %qon line
+qoff_line = line([x4 x4],[y2 y1], 'color', 'b','linewidth',0.5, 'linestyle', '--'); %qoff line
+toff_line = line([x5 x5],[y2 y1], 'color', 'r','linewidth',0.5, 'linestyle', '--'); %toff line
 rpeak_line = line([rpeak rpeak],[y2 y1], 'color', '[0 0.7 0]','linewidth',0.5, 'linestyle', '--'); %Rpeak line
 
 % Make the lines draggable
-draggable(qon_line,'h',[x1-50 x4+50],'endfcn',@update_drag_qon);
-draggable(qoff_line,'h',[x1-50 x4+50],'endfcn',@update_drag_qoff);
-draggable(toff_line,'h',[x1-50 x4+50],'endfcn',@update_drag_tend);
-draggable(rpeak_line,'h',[x1-50 x4+50],'endfcn',@update_drag_rpeak);
+draggable(ppeak_line,'h',[x1-50 x5+50],'endfcn',@update_drag_ppeak);
+draggable(qon_line,'h',[x2-50 x5+50],'endfcn',@update_drag_qon);
+draggable(qoff_line,'h',[x2-50 x5+50],'endfcn',@update_drag_qoff);
+draggable(toff_line,'h',[x2-50 x5+50],'endfcn',@update_drag_tend);
+draggable(rpeak_line,'h',[x2-50 x5+50],'endfcn',@update_drag_rpeak);
 
-% Pad 50 samples around qon/toff for the beat selected
-xlim([x1-50 x4+50]) 
+% Pad -155/50 samples around qon/toff for the beat selected
+% -155 samples provides 310 ms before Q for 2 ms sample time or about 360 ms before R. Was -50
+%xlim([x1-50 x4+50])
+xlim([x2-155 x5+50]) 
 ylim([y1 y2])
 
 
@@ -1097,22 +1098,22 @@ hold off
 % Add green star to X,Y,Z,VM axes (not median beats)
 axes(handles.x_axis)
 hold on
-handles.beat_starx = plot(beatmatrix(str_index,2),X(beatmatrix(str_index,2)),'*','color','g','MarkerSize', 8);
+handles.beat_starx = plot(beatmatrix(str_index,3),X(beatmatrix(str_index,3)),'*','color','g','MarkerSize', 8);
 hold off
 
 axes(handles.y_axis)
 hold on
-handles.beat_stary = plot(beatmatrix(str_index,2),Y(beatmatrix(str_index,2)),'*','color','g','MarkerSize', 8);
+handles.beat_stary = plot(beatmatrix(str_index,3),Y(beatmatrix(str_index,3)),'*','color','g','MarkerSize', 8);
 hold off
 
 axes(handles.z_axis)
 hold on
-handles.beat_starz = plot(beatmatrix(str_index,2),Z(beatmatrix(str_index,2)),'*','color','g','MarkerSize', 8);
+handles.beat_starz = plot(beatmatrix(str_index,3),Z(beatmatrix(str_index,3)),'*','color','g','MarkerSize', 8);
 hold off
 
 axes(handles.vm_axis)
 hold on
-handles.beat_starvm = plot(beatmatrix(str_index,2),VM(beatmatrix(str_index,2)),'*','color','g','MarkerSize', 8);
+handles.beat_starvm = plot(beatmatrix(str_index,3),VM(beatmatrix(str_index,3)),'*','color','g','MarkerSize', 8);
 hold off
 
 % Activate flag noting highlighting is present
@@ -1124,77 +1125,65 @@ listbox_buttons_onoff('On', hObject, eventdata, handles)
 guidata(hObject, handles);      % Updates handles
 
 
-
-% Xcoord of Qon dragged lines
-function new_line_xcoord = update_drag_qon(line)
-
+% Xcoord of Ppeak dragged lines
+function new_line_xcoord = update_drag_ppeak(line)
 drag_line_xdata = round(get(line,'XData'));
 new_line_xcoord = drag_line_xdata(1);
-
 hGui = findobj('Tag','BRAVEHEART_GUI');
  if ~isempty(hGui)
      handles = guidata(hGui);
-
  end
-
 old_beat = str2num(get(handles.edit_selectedbeat_textbox,'String'));
 old_beat(1) = new_line_xcoord;
 set(handles.edit_selectedbeat_textbox,'String',num2str(old_beat));
 
-
-% Xcoord of Qoff dragged lines
-function new_line_xcoord = update_drag_qoff(line)
-
+% Xcoord of Qon dragged lines
+function new_line_xcoord = update_drag_qon(line)
 drag_line_xdata = round(get(line,'XData'));
 new_line_xcoord = drag_line_xdata(1);
-
 hGui = findobj('Tag','BRAVEHEART_GUI');
  if ~isempty(hGui)
      handles = guidata(hGui);
-
  end
-
-old_beat = str2num(get(handles.edit_selectedbeat_textbox,'String'));
-old_beat(3) = new_line_xcoord;
-set(handles.edit_selectedbeat_textbox,'String',num2str(old_beat));
-
-
-
-% Xcoord of Tend dragged lines
-function new_line_xcoord = update_drag_tend(line)
-
-drag_line_xdata = round(get(line,'XData'));
-new_line_xcoord = drag_line_xdata(1);
-
-hGui = findobj('Tag','BRAVEHEART_GUI');
- if ~isempty(hGui)
-     handles = guidata(hGui);
-
- end
-
-old_beat = str2num(get(handles.edit_selectedbeat_textbox,'String'));
-old_beat(4) = new_line_xcoord;
-set(handles.edit_selectedbeat_textbox,'String',num2str(old_beat));
-
-
-
-% Xcoord of Rpeak dragged marker
-function new_line_xcoord = update_drag_rpeak(line)
-
-drag_line_xdata = round(get(line,'XData'));
-new_line_xcoord = drag_line_xdata(2);
-
-hGui = findobj('Tag','BRAVEHEART_GUI');
- if ~isempty(hGui)
-     handles = guidata(hGui);
-
- end
-
 old_beat = str2num(get(handles.edit_selectedbeat_textbox,'String'));
 old_beat(2) = new_line_xcoord;
 set(handles.edit_selectedbeat_textbox,'String',num2str(old_beat));
 
+% Xcoord of Qoff dragged lines
+function new_line_xcoord = update_drag_qoff(line)
+drag_line_xdata = round(get(line,'XData'));
+new_line_xcoord = drag_line_xdata(1);
+hGui = findobj('Tag','BRAVEHEART_GUI');
+ if ~isempty(hGui)
+     handles = guidata(hGui);
+ end
+old_beat = str2num(get(handles.edit_selectedbeat_textbox,'String'));
+old_beat(4) = new_line_xcoord;
+set(handles.edit_selectedbeat_textbox,'String',num2str(old_beat));
 
+% Xcoord of Tend dragged lines
+function new_line_xcoord = update_drag_tend(line)
+drag_line_xdata = round(get(line,'XData'));
+new_line_xcoord = drag_line_xdata(1);
+hGui = findobj('Tag','BRAVEHEART_GUI');
+ if ~isempty(hGui)
+     handles = guidata(hGui);
+ end
+old_beat = str2num(get(handles.edit_selectedbeat_textbox,'String'));
+old_beat(5) = new_line_xcoord;
+set(handles.edit_selectedbeat_textbox,'String',num2str(old_beat));
+
+% Xcoord of Rpeak dragged marker
+function new_line_xcoord = update_drag_rpeak(line)
+drag_line_xdata = round(get(line,'XData'));
+new_line_xcoord = drag_line_xdata(2);
+hGui = findobj('Tag','BRAVEHEART_GUI');
+ if ~isempty(hGui)
+     handles = guidata(hGui);
+ end
+old_beat = str2num(get(handles.edit_selectedbeat_textbox,'String'));
+old_beat(3) = new_line_xcoord;
+set(handles.edit_selectedbeat_textbox,'String',num2str(old_beat));
 
 % --- Executes during object creation, after setting all properties.
 function activebeats_list_CreateFcn(hObject, eventdata, handles)
@@ -1503,6 +1492,14 @@ function z_stats_button_Callback(hObject, eventdata, handles)
 
 [ ~, ~, ~, ~, ~, ~, ~]  = xyz_stats(3, hObject, eventdata, handles);
 
+% --- Executes on button press in vm_stats_button.
+function vm_stats_button_Callback(hObject, eventdata, handles)
+% hObject    handle to vm_stats_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+[ ~, ~, ~, ~, ~, ~, ~]  = xyz_stats(4, hObject, eventdata, handles);
+
 
 function excel_filename_Callback(hObject, eventdata, handles)
 % hObject    handle to excel_filename (see GCBO)
@@ -1688,7 +1685,8 @@ if strcmp(note,"")
 end
 
 i = 1;  % Deal with issue in how AnnoResult handles single ecgs outide of batch. HFS: don't change!
-results{i} = AnnoResult(basename, note, source_str, aps, ecg, hr, num_initial_beats, beats, beat_stats, corr, noise, quality.prob_value, quality.missing_lead, geh, morph, vcg_morph);
+results{i} = AnnoResult(basename, note, source_str, aps, ecg, hr, num_initial_beats, beats, beat_stats, ...
+    corr, noise, quality.prob_value, quality.missing_lead, geh, morph, vcg_morph);
 	
 save_folder = get(handles.save_dir_txt,'String');
 filename = handles.filename;  % filename loaded
@@ -1702,18 +1700,15 @@ result = AnnoResult(results);
 
 % Append to existing file if file already exists
 if isfile(excelfilename)
-f = readcell(char(excelfilename));
-missingind = cellfun(@(x) all(ismissing(x)), f); % took me a long time to figure that out!
-f(missingind) = {''}; % you can't writecell() on a cell array with missing values; has to be empty array instead
-f = [f ; a];
-writecell(f,  char(excelfilename));    
-set(handles.success_txt,'Visible','On')
-
+    f = readcell(char(excelfilename));
+    missingind = cellfun(@(x) all(ismissing(x)), f); % took me a long time to figure that out!
+    f(missingind) = {''}; % you can't writecell() on a cell array with missing values; has to be empty array instead
+    f = [f ; a];
+    writecell(f,  char(excelfilename));    
+    set(handles.success_txt,'Visible','On')
 else    
-writecell( [h ; a], char(excelfilename));
-
-set(handles.success_txt,'Visible','On')
-    
+    writecell( [h ; a], char(excelfilename));
+    set(handles.success_txt,'Visible','On')
 end
 end
 
@@ -1811,6 +1806,36 @@ xlabel('X','FontWeight','bold','FontSize',14);
 ylabel('Y','FontWeight','bold','FontSize',14);
 zlabel('Z','FontWeight','bold','FontSize',14);
 
+% get flag for which type of graph to display
+speed_flag = get(handles.speed_checkbox,'Value');
+% If doing colored speed plot, include colorbar legend to the right of the 3D plot (like in main Braveheart GUI).
+if speed_flag == 1
+    colormap jet(256);
+    cbar_graph = colorbar;
+    % Label the colorbar legend.
+    ylabel(cbar_graph, 'Speed (mV/ms)', 'FontWeight', 'bold');
+    % Get the positions of the 3D plot axes and the colorbar legend.
+    ax = gca;
+    axPos = get(ax, 'Position');
+    cbPos = get(cbar_graph, 'Position');
+    % Calculate the new X position for the colorbar legend just to the RIGHT of the 3D plot axes
+    cbPos(1) = axPos(1) + axPos(3) + 0.02; % Small gap to the right of the axes
+    cbPos(2) = axPos(2); % Align the bottom of the colorbar with the minimum axes position for all 3D orientations.
+    set(cbar_graph, 'Position', cbPos);
+    % Get the legend handle
+    l = findobj(h,'Type','Legend'); 
+    % Get the existing postion of the boxed, plot-line legend.
+    lPos = get(l, 'Position');
+    % Calculate the width of the boxed, plot-line legend.legend
+    legendWidth = lPos(3); 
+    % Adjust the boxed, plot-line legend position to the right of the colorbar legend by 25% of its width
+    lPos(1) = cbPos(1) + cbPos(3) + 0.30 * legendWidth;
+    set(l, 'Position', lPos);
+    % Set the range for the vertical color bar legend.
+    min_speed_3d = handles.min_speed_3d;
+    max_speed_3d = handles.max_speed_3d;
+    set(gca, 'CLim', [min_speed_3d, max_speed_3d]); 
+end
 rotate3d on
 
 
@@ -2591,8 +2616,10 @@ speed_filename = fullfile(save_folder,filename_short);
 
 popout = 0;
 
-speed_graph_gui(hObject, eventdata, handles, speed_filename, save_flag, 0, str2num(get(handles.speed_blank_txt, 'String')), str2num(get(handles.speed_t_blank_txt, 'String')), accel_flag, legend_flag, popout);
-
+speed_graph_gui(hObject, eventdata, handles, speed_filename, save_flag, 0, ...
+    str2num(get(handles.speed_blank_txt, 'String')), ...
+    str2num(get(handles.speed_t_blank_txt, 'String')), ...
+    accel_flag, legend_flag, popout);
 
 % --- Executes on button press in tab3_button.
 function tab3_button_Callback(hObject, eventdata, handles)
@@ -3135,6 +3162,10 @@ handles = guidata(hObject);     % Take handles from the function and transfer to
 % Fix issue with highlighting caused by reanno median
 handles.median_anno_press_flag = 0;            
     
+% If file extension is .rdt, set Value of ecg_source to 18 so .rdt source type is automatically used.
+if strcmpi(ext, '.rdt')
+    set(handles.ecg_source, 'Value', 18);
+end
 % Set ecg_string appropriately
 strlist = get(handles.ecg_source, 'String');
 handles.ecg_string = strlist{get(handles.ecg_source,'Value')};
@@ -3318,7 +3349,7 @@ else
 % batch_calc now does bascially everything needed to calculate the VCGs,
 % filtering, baseline correction, pacemaker spike removal, GEH, and other outputs, etc.
 % For GUI only need to calculate the HR on this first pass, as after this
-% the beats may be altered and wont get an accurate HR calculation
+% the beats may be altered and wont give an accurate HR calculation
 
 [handles.hr, handles.num_initial_beats, ~, ~, ~, ~, ~, ~, ~,~, ...
    ~, ~, ~, ~, handles.vcg, ~, ~] = batch_calc(handles.ecg_raw, [], [], [], [], [], aps, qps, 0, "", []);
@@ -4335,7 +4366,7 @@ else   % IF NOT MEDIAN
         ~, ~, ~, ~, ~] = batch_calc(handles.ecg_raw, handles.beats, [], [], [], [], aps, qps, 0, "", []);
     
     
-    % Get flags for processing different modules
+% Get flags for processing different modules
 vcg_calc_flag = get(handles.geh_option_checkbox,'Value');
 lead_morph_flag = get(handles.lead_morphology_option_checkbox,'Value');
 vcg_morph_flag = get(handles.vcg_morphology_option_checkbox,'Value');
@@ -4591,9 +4622,10 @@ speed_filename = fullfile(save_folder,filename_short);
 
 popout = 1;
 
-speed_graph_gui(hObject, eventdata, handles, speed_filename, save_flag, 0, str2num(get(handles.speed_blank_txt, 'String')), str2num(get(handles.speed_t_blank_txt, 'String')), accel_flag, legend_flag, popout);
-
-
+speed_graph_gui(hObject, eventdata, handles, speed_filename, save_flag, 0, ...
+    str2num(get(handles.speed_blank_txt, 'String')), ...
+    str2num(get(handles.speed_t_blank_txt, 'String')), ...
+    accel_flag, legend_flag, popout);
 
 % --- Executes on button press in norm_values_buton.
 function norm_values_buton_Callback(hObject, eventdata, handles)

@@ -65,7 +65,6 @@ speed_3d(1)=nan;  % correct for no velocity at point 1 (otherwise always = 0)
 max_vm =max(medianvm);
 max_speed = max(speed_3d);
 
-
 % ACCELERATION 
 accel_3d=zeros(1,length(medianvm));
 
@@ -81,7 +80,6 @@ end
 % Starting at time = 0 ms
 tx = 0:sample_time:(length(medianvm)*(sample_time))-1;
 
-
 % If shift Qon to 0 ms
 tx = tx - ((Q-1)*sample_time);
 Qorig = Q;
@@ -91,7 +89,6 @@ Tend = (Tend - Qorig) * sample_time;
 
 % Now Q, S, and Tend are shifted so that Qon is at time 0
 % Q, S, and Tend are now in MILLISECONDS, not samples
-
 
 % Graph inside GUI or as a popout
 if popout == 0
@@ -125,10 +122,10 @@ s4_m = scatter(0.5*(tx(speed_qrs_max.loc_samp)+tx(speed_qrs_max.loc_samp_st)), 0
 line([tx(speed_qrs_max.loc_samp) tx(speed_qrs_max.loc_samp_st)],[medianvm(speed_qrs_max.loc_samp) medianvm(speed_qrs_max.loc_samp_st)],'Color','k','linewidth',2);
 
 % Add max speed in T wave to figure
-s5 = scatter(tx(speed_t_max.loc_samp), medianvm(speed_t_max.loc_samp),70,'d','linewidth',1.3,'MarkerEdgeColor',[0 0.7 0],'displayname','Fastest QRS Segment');
-s5_2 = scatter(tx(speed_t_max.loc_samp_st), medianvm(speed_t_max.loc_samp_st),70,'d','linewidth',1.3,'MarkerEdgeColor',[0 0.7 0],'displayname','Fastest QRS Segment2');
-s5_m = scatter(0.5*(tx(speed_t_max.loc_samp)+tx(speed_t_max.loc_samp_st)), 0.5*(medianvm(speed_t_max.loc_samp)+medianvm(speed_t_max.loc_samp_st)),90,'MarkerEdgeColor',[0 0 0],'MarkerFaceColor',[0 0.7 0],'displayname','Fastest QRS Point (Mean)');
-line([tx(speed_t_max.loc_samp) tx(speed_t_max.loc_samp_st)],[medianvm(speed_t_max.loc_samp) medianvm(speed_t_max.loc_samp_st)],'Color',[0 0.7 0],'linewidth',2);
+s5 = scatter(tx(speed_t_max.loc_samp), medianvm(speed_t_max.loc_samp),70,'d','linewidth',1.3,'MarkerEdgeColor',[0 1. 1.],'displayname','Fastest T Segment');
+s5_2 = scatter(tx(speed_t_max.loc_samp_st), medianvm(speed_t_max.loc_samp_st),70,'d','linewidth',1.3,'MarkerEdgeColor',[0 1. 1.],'displayname','Fastest T Segment2');
+s5_m = scatter(0.5*(tx(speed_t_max.loc_samp)+tx(speed_t_max.loc_samp_st)), 0.5*(medianvm(speed_t_max.loc_samp)+medianvm(speed_t_max.loc_samp_st)),90,'MarkerEdgeColor',[0 0 0],'MarkerFaceColor',[0 1. 1.],'displayname','Fastest T Point (Mean)');
+line([tx(speed_t_max.loc_samp) tx(speed_t_max.loc_samp_st)],[medianvm(speed_t_max.loc_samp) medianvm(speed_t_max.loc_samp_st)],'Color',[0 1. 1.],'linewidth',2);
 
 yyaxis right
 s2 = plot(tx,speed_3d,'LineWidth',2,'color','r','displayname','VCG Speed');
@@ -144,23 +141,24 @@ end
 right_ylim_min = min(ylim);
 right_ylim_max = max(ylim);
 
-
 if accel_flag == 1
 
         % Accel graph
         % Add acceleration tracing and min/max
 
-        s_accel = plot(tx,accel_3d,'LineWidth',2,'color','[0 0.3 0]','linestyle','-','displayname','Acceleration');
+        s_accel = plot(tx,accel_3d,'LineWidth',2,'color','[0 0.7 0]','linestyle','-','displayname','Acceleration');
         
-        ylabel('Speed (mV/ms) {\color{black}&} {\color[rgb]{0,0.5,0}Acceleration (mV/ms^{2})}','FontWeight','bold','FontSize',12)
+        ylabel('Speed (mV/ms) {\color{black}&} {\color[rgb]{0,0.7,0}Acceleration (mV/ms^{2})}','FontWeight','bold','FontSize',12)
         
         % assign ylim for right axis
         right_ylim_min = min(ylim);
         right_ylim_max = max(ylim);
 
-        % switch back to left axis to plot poitns of max acceleration on median beat
+        % switch back to left axis to plot points of max acceleration on median beat
         yyaxis left
 
+        % NOTE: Q = 0 for some calls, an illegal index. Replaced with 1.
+        Q = max(1,Q);
         [accel_pos_max, ~, ~] = min_max_locs(accel_3d, Q, length(accel_3d), blank_samples, 1000/sample_time);  
         [accel_neg_max, ~, ~] = min_max_locs(-accel_3d, Q, length(accel_3d), blank_samples, 1000/sample_time);  
 
@@ -181,10 +179,9 @@ if blank_samples >= 0       % Always will be some blanking prior to QRS onset
     s_fill = fill([min(tx) (Q+blank_q_ms) (Q+blank_q_ms) min(tx)], [right_ylim_min right_ylim_min right_ylim_max right_ylim_max ],[0.6 0.6 0.6],'EdgeColor','none','facealpha',0.3,'displayname','Blanking Period');
 end
 
-
 % T wave onset blanking period line and fills
 yyaxis right
-if blank_samples_t > 0      % Only show blaking if blank_samples_t > 0
+if blank_samples_t > 0      % Only show blanking if blank_samples_t > 0
     s_fill_t = fill([S (S+blank_t_ms) (S+blank_t_ms) S], [right_ylim_min right_ylim_min right_ylim_max right_ylim_max ],[0.6 0.6 0.6],'EdgeColor','none','facealpha',0.3,'displayname','Blanking Period');
 end
 

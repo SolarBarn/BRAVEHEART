@@ -66,7 +66,7 @@ noise = [hf_noise_min lf_noise_max];
 % If not supplying median beat information - eg denovo ECG/VCG processing
 if isempty(ovrmedianbeat) && isempty(ovrmedianvcg) && isempty(ovrmedian12L)
 
-% Unfiltered (raw) VCG from unfiltered (raw) ECG
+% Unfiltered (raw) VCG (X,Y,Z,VM) waveforms from unfiltered (raw) 12-lead ECG waveforms.
 vcg_raw = VCG(ecg_raw, ap);
 
 % Find Rpeaks in VCG VM lead

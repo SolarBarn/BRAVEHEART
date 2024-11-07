@@ -20,7 +20,7 @@
 % This software is for research purposes only and is not intended to diagnose or treat any disease.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [Q, QRS, S, T, Tend] = autoMFannotate(signal, QRS, QRsamp, endspikes, RSsamp, STstartsamp, ...
+function [P, Q, QRS, S, T, Tend] = autoMFannotate(signal, QRS, QRsamp, endspikes, RSsamp, STstartsamp, ...
     STendsamp, Tendstr, autoMF, filter_width, autoMF_thresh, freq, debug)
 % QRS: indices of peaks in signal
 % endspikes: vector, location of pacing spikes if present
@@ -38,6 +38,7 @@ function [Q, QRS, S, T, Tend] = autoMFannotate(signal, QRS, QRsamp, endspikes, R
 % These detection windows are used as guardrails for the heuristic QRS annotator, annoMF
 % this is done by using a median filter to estimate the width of each QRS
 
+debug = false;
 
 if isrow(QRS); QRS=QRS'; end
 if isrow(QRsamp); QRsamp = QRsamp'; end
@@ -91,7 +92,7 @@ qrs_end = QRS + RSsamp;
 
 % full ECG annotation
 %[Q, QRS, S, T, Tend] = annoCL(signal, QRS, RSsamp, QRsamp, CLsamp, STstartsamp, STend, Tendstr, hz, debug);
-[Q, QRS, S, T, Tend] = annoMF(signal, QRS, qrs_start, qrs_end, STstart, STend, Tendstr, ...
+[P, Q, QRS, S, T, Tend] = annoMF(signal, QRS, qrs_start, qrs_end, STstart, STend, Tendstr, ...
     filter_width, autoMF_thresh, debug);
 
 end

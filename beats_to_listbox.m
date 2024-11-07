@@ -23,44 +23,40 @@
 
 % Takes annotation output and formats for listbox in GUI
 
-function listbox_beats = beats_to_listbox(qon, rpeak, qoff, toff)
+function listbox_beats = beats_to_listbox(ppeak, qon, rpeak, qoff, toff)
 
 % pull qon_out each beat into a new row in matrx "beat" for display in listbox
 
-beat_dim = max([length(qon) length(rpeak) length(qoff) length(toff)]); %account for differences in number of fiducual points if some QRST cut off
+beat_dim = max([length(ppeak), length(qon), length(rpeak), length(qoff), length(toff)], [], 2); %account for differences in number of fiducual points if some QRST cut off
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %add padding if number of all fiducial points not same (due to cut off)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-beats = zeros(beat_dim,4);
+% Fill beats array with Qon, Rpk, Qoff, Toff values for each beat.
+beats = zeros(beat_dim,5);
+beats = [ppeak(:), qon(:), rpeak(:), qoff(:), toff(:)];
 
-for i = 1:length(qon)
-   beats(i,1) = qon(i);
-    
+% Initialize cell array.
+listbox_beats = cell(size(beats, 1), 1);
+% Fill array row by row with 4 entries per row and space between entries.
+for i = 1:size(beats, 1)
+    rowStr = ''; 
+    for j = 1:size(beats, 2)
+        % If < 1000 add 2 leading spaces to right align value in column.
+        if beats(i, j) < 1000
+            rowStr = [rowStr sprintf('  %d  ', beats(i, j))];
+        else
+            if j == 4
+                rowStr = [rowStr sprintf(' %d  ', beats(i, j))];
+            else
+                rowStr = [rowStr sprintf('%d  ', beats(i, j))];
+            end
+        end
+    end
+    listbox_beats{i} = rowStr; % Add the formatted row to the cell array
 end
-
-
-for i = 1:length(rpeak)
-   beats(i,2) = rpeak(i);
-    
-end
-
-
-for i = 1:length(qoff)
-   beats(i,3) = qoff(i);
-    
-end
-
-
-for i = 1:length(toff)
-   beats(i,4) = toff(i);
-    
-end
-
-
-
-listbox_beats = num2str(beats);
-
+listbox_beats = strjoin(listbox_beats, '\n');
+%listbox_beats = num2str(beats); % Old code
 
 

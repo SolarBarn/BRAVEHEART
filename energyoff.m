@@ -31,7 +31,7 @@ function off = energyoff(fs, fsprime, T, endw, R, RR, debug)
 % Automated Algorithm for J-Tpeak and Tpeak-Tend Assessment of Drug-Induced Proarrhythmia Risk
 % PLOS ONE | DOI:10.1371/journal.pone.0166925 December 30, 2016 5 /
 
-energydebug=false;
+energydebug = false;
 
 fsl = fs(T:endw);
 fspl = fsprime(T:endw);

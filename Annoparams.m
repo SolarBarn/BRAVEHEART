@@ -77,7 +77,9 @@ classdef Annoparams
 		align_flag = 'CoV';              % Beat alignment method ('CoV' or 'Rpeak')
 		cov_mf = 40;                     % width of CoV median filter (in ms)
 		cov_thresh = 30;                 % CoV median filter threshold %
-		shiftq = -40;                    % Q window expand when calculating median beat (in ms)
+        % This accomodates P-wave starting 360 before R at least for simulated ECG with QRS 96 ms wide.
+		shiftq = -310;                   % Q window expand when calculating median beat (in ms)
+        % shiftq = -40;                    % Q window expand when calculating median beat (in ms)
 		shiftt = 60;                     % T window expand when calculating median beat (in ms)
 		%window_rrfrac = 1.0;            % limit median beat window to this fraction of the median RR interval
 		

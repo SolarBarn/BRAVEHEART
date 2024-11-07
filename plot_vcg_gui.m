@@ -132,30 +132,29 @@ end  % End speed_flag == 0
 if speed_flag == 1  % plot color coded speed
         SpeedColorMap = jet(256);    
         speed_3d=zeros(1,length(x));
-
         for i=Q:length(speed_3d)-1
             speed_3d(i+1)= sqrt((x(i+1)-x(i))^2+(y(i+1)-y(i))^2+(z(i+1)-z(i))^2)/sample_time; 
-
         end
-            speed_3d=speed_3d'; 
-
+            speed_3d=speed_3d';
 % Divide 256/maxC to get conversion factor to map to colormap
         ColorConv = 256/max(speed_3d);
         speed_3d_rounded=round(speed_3d*ColorConv);
         speed_3d_rounded(speed_3d_rounded == 0)=1;
-
         LineColor=zeros(1,length(speed_3d));    
-
-
         for i=Q:length(speed_3d_rounded)-1
-
             line([x(i) x(i+1)], [y(i) y(i+1)], [z(i) z(i+1)],'Color', [SpeedColorMap(speed_3d_rounded(i+1),:)],'linewidth',3);
             hold on
         end    
-
         colormap jet(256);
         cbar_graph = colorbar;
-        set(gca, 'CLim', [min(speed_3d), max(speed_3d)]);
+        % Save min/max speed_3d for use by pop Out
+        min_speed_3d = min(speed_3d);
+        max_speed_3d = max(speed_3d);
+        handles.min_speed_3d = min_speed_3d;
+        handles.max_speed_3d = max_speed_3d;
+        guidata(hObject, handles);
+        % Set range for colorbar legend.
+        set(gca, 'CLim', [min_speed_3d, max_speed_3d]);
         ylabel(cbar_graph, 'Speed (mV/ms)')
         
         p3 = scatter3(x(S),y(S),z(S),60,'MarkerFaceColor','y','MarkerEdgeColor','k','DisplayName','QRS End');

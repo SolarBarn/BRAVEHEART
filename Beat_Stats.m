@@ -24,6 +24,11 @@ classdef Beat_Stats
 % This class computes statistics on various beat intervals
     
     properties  (SetAccess=private)
+        pr_median
+        pr_min
+        pr_max
+        pr_iqr
+        
         qrs_median
         qrs_min
         qrs_max
@@ -79,10 +84,16 @@ classdef Beat_Stats
             
             if nargin == 2
                 
+                pr = sample_time*(beats.QRS - beats.P);
                 qrs = sample_time*(beats.S - beats.Q);
                 jt = sample_time*(beats.Tend - beats.S);
                 qt = sample_time*(beats.Tend - beats.Q);
                 
+                obj.pr_median = median(pr,'omitnan');
+                obj.pr_min = min(pr);
+                obj.pr_max = max(pr);
+                obj.pr_iqr = iqr(pr);
+
                 obj.qrs_median = median(qrs,'omitnan');
                 obj.qrs_min = min(qrs);
                 obj.qrs_max = max(qrs);

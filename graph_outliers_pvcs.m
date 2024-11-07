@@ -45,7 +45,7 @@ str_matrix = get(handles.activebeats_list,'String');
                 string = strcat(str_matrix(i,:), '   ');
             else
                 %string = ['<HTML><font color="red">' str_matrix(i,:) '</font></HTML>'];
-                string = strcat(str_matrix(i,:), '  **');
+                string = strcat(str_matrix(i,:), '    **');
             end
             if isempty(new_str_matrix)
                 new_str_matrix = char(string);
@@ -61,8 +61,7 @@ str_matrix = get(handles.activebeats_list,'String');
         end
         
         set(handles.activebeats_list, 'Value', 1);
-      
-% PVC      
+% PVC
 str_matrix = get(handles.activebeats_list,'String');
         new_str_matrix='';
         for i=1:numel(pvcs)
@@ -86,7 +85,6 @@ str_matrix = get(handles.activebeats_list,'String');
         end
         
         set(handles.activebeats_list, 'Value', 1);
-      
           
 % Graph Outliers      
       axes(handles.x_axis);
@@ -107,8 +105,7 @@ str_matrix = get(handles.activebeats_list,'String');
       axes(handles.vm_axis);
       hold on
       scatter(outlier_r_locs, VM(outlier_r_locs),80,'o','MarkerEdgeColor','[0.25, 0.25, 0.25]','LineWidth',0.8)
-      hold off
-      
+      hold off      
       
 % Graph PVCs      
       axes(handles.x_axis);

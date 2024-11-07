@@ -29,6 +29,7 @@ classdef Beats
 % The annotation is computed via calling the constructor with a VCG. Nothing about the VCG itself is stored in this class.
 
     properties (SetAccess=private)
+        P
         Q
         QRS
         S
@@ -50,9 +51,10 @@ classdef Beats
             switch nargin
                               
                 case 5
-                    [Q, QRS, S, T, Tend] = varargin{:};
-                    if length(QRS) == length(Q) && length(QRS) == length(S) && length(QRS) == length(T) && ...
+                    [P, Q, QRS, S, T, Tend] = varargin{:};
+                    if length(P) == length(QRS) && length(QRS) == length(Q) && length(QRS) == length(S) && length(QRS) == length(T) && ...
                             length(QRS) == length(Tend)
+                        obj.P = P;
                         obj.QRS = QRS;
                         obj.Q = Q;
                         obj.S = S;
@@ -63,8 +65,9 @@ classdef Beats
                     end
                 case 4
                     [Q, QRS, S, Tend] = varargin{:};
-                    if length(QRS) == length(Q) && length(QRS) == length(S) && ...
+                    if length(P) == length(QRS) && length(QRS) == length(Q) && length(QRS) == length(S) && ...
                             length(QRS) == length(Tend)
+                        obj.P = P;
                         obj.QRS = QRS;
                         obj.Q = Q;
                         obj.S = S;
@@ -87,7 +90,7 @@ classdef Beats
                     % If using regular annotation for median reanno
                     if strcmp(aps.median_reanno_method,'Std') || length(QRS) ~= 1
                         
-                        [obj.Q, obj.QRS, obj.S, obj.T, obj.Tend] = ...
+                        [obj.P, obj.Q, obj.QRS, obj.S, obj.T, obj.Tend] = ...
                             autoMFannotate(vcg.VM, QRS, aps.QRsamp(hz), vcg.endspikes, ...
                             aps.RSsamp(hz), aps.STstartsamp(hz), STendsamp, aps.Tendstr, ...
                             aps.autoMF, aps.MF_width_samp(hz), aps.autoMF_thresh, hz, aps.debug); 
@@ -107,18 +110,14 @@ classdef Beats
                         % Sort in ascending order
                         obj.QRS_rem_bad = sort(obj.QRS_rem_bad);
                     end
-
-
                     
                     % If using nnet for median reanno
                     if strcmp(aps.median_reanno_method,'NNet') && length(QRS) == 1
                         
-                        [obj.Q, obj.S, obj.T, obj.Tend, obj.nnet_flag, obj.nnet_nan] = nnet_median_annotate(vcg, aps.debug);
+                        [obj.P, obj.Q, obj.S, obj.T, obj.Tend, obj.nnet_flag, obj.nnet_nan] = nnet_median_annotate(vcg, aps.debug);
                         obj.QRS = QRS;
                     end
-                    
-                    
-                    
+                                        
                     % check for overlapping beats
                     for i=1:length(obj.QRS)-1
                         if obj.Tend(i) > obj.Q(i+1); obj.Tend(i) = NaN; end
@@ -151,7 +150,7 @@ classdef Beats
         
         function l = length(obj); l = length(obj.QRS); end
         
-        function b = beatmatrix(obj); b = [obj.Q obj.QRS obj.S obj.Tend]; end
+        function b = beatmatrix(obj); b = [obj.P, obj.Q obj.QRS obj.S obj.Tend]; end
         
         
         
@@ -225,6 +224,7 @@ classdef Beats
             
             obj_old = obj;
             
+            obj.P(ind) = [];
             obj.Q(ind) = [];
             obj.QRS(ind) = [];
             obj.S(ind) = [];
@@ -282,14 +282,16 @@ classdef Beats
         end
         
         function obj = change(obj, ind, newbeat)
-            if length(newbeat) == 4
-                newQ = newbeat(1);
-                newQRS = newbeat(2);
-                newS = newbeat(3);
-                newTend = newbeat(4);
+            if length(newbeat) == 5
+                newP = newbeat(1);
+                newQ = newbeat(2);
+                newQRS = newbeat(3);
+                newS = newbeat(4);
+                newTend = newbeat(5);
             else
-                error('New beat is 4 points long - do NOT include Tpeak');
+                error('New beat is 5 points long - do NOT include Tpeak');
             end
+            obj.P(ind) = newP;
             obj.Q(ind) = newQ;
             obj.QRS(ind) = newQRS;
             obj.S(ind) = newS;
@@ -298,18 +300,20 @@ classdef Beats
         end
         
         function b = add(obj, newbeat)
-            if length(newbeat) == 4
-                newQ = newbeat(1);
-                newQRS = newbeat(2);
-                newS = newbeat(3);
+            if length(newbeat) == 5
+                newP = newbeat(1);
+                newQ = newbeat(2);
+                newQRS = newbeat(3);
+                newS = newbeat(4);
                 newT = 0;   % Zero for T since not used
-                newTend = newbeat(4);
+                newTend = newbeat(5);
             else
-                error('New beat is 4 points long - do NOT include Tpeak');
+                error('New beat is 5 points long - do NOT include Tpeak');
             end
             b = obj;
             len = obj.length();
             ind = len + 1;
+            b.P(ind) = newP;
             b.Q(ind) = newQ;
             b.QRS(ind) = newQRS;
             b.S(ind) = newS;
@@ -317,8 +321,11 @@ classdef Beats
             b.Tend(ind) = newTend;
         end
         
-        
-        
+        function b = shift_p(obj, shift)
+            b = obj;
+            b.P = b.P+shift;
+        end
+
         function b = shift_q(obj, shift)
             b = obj;
             b.Q = b.Q+shift;
@@ -344,7 +351,7 @@ classdef Beats
             b.Tend = b.Tend+shift;
         end
         
-        function d = QRSdur(obj); d = obj.S-obj.Q; end
+        function d = QRSdur(obj); d = obj.S - obj.Q; end
         function d = RRint(obj); N=obj.length(); d = obj.QRS(2:N) - obj.QRS(1:N-1); end
         
         function obj = find_outliers(obj, vcg, ap)

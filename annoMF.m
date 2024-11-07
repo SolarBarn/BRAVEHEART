@@ -20,7 +20,7 @@
 % This software is for research purposes only and is not intended to diagnose or treat any disease.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [Q, newQRS, S, T, Tend] = annoMF(signal, QRS, qrs_start, qrs_end, ...
+function [P, Q, newQRS, S, T, Tend] = annoMF(signal, QRS, qrs_start, qrs_end, ...
     STstart, STend, Tendstr, width_filter, width_threshold, debug)
 % [Q, newQRS, S, T, Tend] = annoMF(signal, QRS, qrs_end, qrs_start, STstart, STend, Tendstr, debug)
 % Heuristic annotation for vector magnitude signals derived from the ECG
@@ -67,7 +67,7 @@ qrs_start(removed) = [];
 NQRS = numel(QRS);
 
 RRint = N/NQRS;
-Q = zeros(NQRS,1); S= zeros(NQRS,1); T= zeros(NQRS,1); Tend= zeros(NQRS,1);
+P = zeros(NQRS,1); Q = zeros(NQRS,1); S= zeros(NQRS,1); T= zeros(NQRS,1); Tend= zeros(NQRS,1);
 j=1;
 k=1;
 baseline_est = zeros(N,1);
@@ -180,8 +180,7 @@ for i=1:NQRS
     % Don't update our estimate of the noise locally
     % it seems like the estimate from the whole EKG is more robust
     % noise = 1.4826*mad(residual(Tstartw:Tendw), 1);
-%    [T, Toff] = findT2ndB(fs, fsprime, fspp, Tstartw, Tendw, baseline_est, noise);
-    
+    %    [T, Toff] = findT2ndB(fs, fsprime, fspp, Tstartw, Tendw, baseline_est, noise);    
     
     if strcmpi(Tendstr, 'baseline') || strcmpi(Tendstr, 'tangent')
         [TT, TToff] = findTGauss(fs, fsprime, fspp, baseline_est, Tstartw, Tendw, Tendstr, debug);
@@ -205,6 +204,11 @@ for i=1:NQRS
     if isempty(TToff); TToff=NaN; end
     if debug && ~isnan(TToff); text(TToff, fs(TToff), '}', 'FontSize', 16, 'Color', 'red', 'interpreter', 'none'); end
     
+    Pstartw = R - 180;
+    Pendw = R - 40;
+    [~, PP] = max(fs(Pstartw:Pendw)); PP = PP + Pstartw-1;
+
+    P(j)=PP;
     Q(j)=s; 
     QRS(j)=R; 
     S(j)=e; 
@@ -215,6 +219,7 @@ for i=1:NQRS
     
 end
 
+P = P(k:j-1);
 Q = Q(k:j-1);
 newQRS = QRS(k:j-1);
 S = S(k:j-1);
@@ -226,6 +231,7 @@ Tend = Tend(k:j-1);
 % its likely that there is an issue with that beat
 
 if Q(1) == 1 
+    P(1) = [];
     Q(1) = [];
     S(1) = [];
     T(1) = [];
@@ -234,6 +240,7 @@ if Q(1) == 1
 end
 
 if Tend(end) == N 
+    P(end) = [];
     Q(end) = [];
     S(end) = [];
     T(end) = [];
@@ -241,8 +248,8 @@ if Tend(end) == N
     newQRS(end) = [];    
 end
 
-
 end
+
 
 
 % 

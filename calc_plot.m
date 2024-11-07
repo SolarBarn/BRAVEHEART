@@ -24,9 +24,9 @@ function calc_plot(vcg, beats, aps, hObject, eventdata, handles)
   
 % Add beats to listbox in GUI
     set(handles.activebeats_list,'String',[]);
-    listbox_beats = beats_to_listbox(beats.Q, beats.QRS, beats.S, beats.Tend);
+    listbox_beats = beats_to_listbox(beats.P, beats.Q, beats.QRS, beats.S, beats.Tend);
     set(handles.activebeats_list,'String',listbox_beats);
-    
+
 % Add number of beats to the best listbox header
     set(handles.uipanel9,'Title',strcat('Annotated Beats (',num2str(length(beats.Q)),')'))
 
@@ -34,7 +34,8 @@ function calc_plot(vcg, beats, aps, hObject, eventdata, handles)
     show_fiducialpts_gui(vcg, beats, hObject,eventdata,handles);
       
 % Display median beats/individual beats aligned in GUI
-    display_medianbeats(handles.median_vcg, handles.beatsig_vcg, handles.medianbeat, handles.medianbeat.T, hObject, eventdata, handles);
+    display_medianbeats(handles.median_vcg, handles.beatsig_vcg, handles.medianbeat, ...
+        handles.medianbeat.P, handles.medianbeat.QRS, handles.medianbeat.T, hObject, eventdata, handles);
     
 % Update GUI values with geh, lead_morphology, beat stats, and basic intervals
     update_gui_values(handles.geh, handles.beat_stats, hObject, eventdata, handles);

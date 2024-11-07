@@ -64,7 +64,13 @@ classdef ECG12
                 
                 % ADD NEW ECG FORMATS TO THIS SWITCH STATEMENT
                 switch format
-                    
+                    % Raw data type compatible with Norac 1200M Raw Data Output.
+                    case 'rdt'
+                        obj.hz=500;
+                        unitspermv=409.6;
+                        [obj.I, obj.II, obj.III, obj.avR, obj.avL, obj.avF, ...
+                            obj.V1, obj.V2, obj.V3, obj.V4, obj.V5, obj.V6] = load_rdt(filename, unitspermv);
+ 
                     case 'bidmc_format'
                         obj.hz=500;
                         unitspermv=200;

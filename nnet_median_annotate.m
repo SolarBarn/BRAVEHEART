@@ -21,7 +21,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function [Q, S, T, Tend, flag, nan_count] = nnet_median_annotate(signal_full, debug)
+function [P, Q, S, T, Tend, flag, nan_count] = nnet_median_annotate(signal_full, debug)
 
 signal = signal_full.VM;
 signal_orig = signal;
@@ -73,7 +73,16 @@ if ~isnan(Tend)
 else
 	T = NaN;
 end
+
+% Simple estimate of P-wave peak location. Should add 140,20 to Annoparams.
+try
+    ppk_candidates = find(signal == max(signal(Q - 140:Q - 20)));
+    P =ppk_candidates(1);
+catch
+    P = NaN;
+end
       
+P_down = P;
 Q_down = Q;
 S_down = S;
 T_down = T;
@@ -92,7 +101,8 @@ Tend_down = Tend;
 
 if freq ~= 500
 
-	Q = resamp_loc(500, freq, Q);
+	P = resamp_loc(500, freq, P);
+    Q = resamp_loc(500, freq, Q);
 	S = resamp_loc(500, freq, S);
 	T = resamp_loc(500, freq, T);
 	Tend = resamp_loc(500, freq, Tend);

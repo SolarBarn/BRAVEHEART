@@ -101,8 +101,12 @@ set(handles.med_t_speed_txt,'String',round(geh.speed_t_med,4));
 set(handles.max_t_speed_time_txt,'String',sprintf("%.0f ms",geh.time_speed_t_max));
 %set(handles.min_t_speed_time_txt,'String',sprintf("%.0f ms",handles.time_speed_t_min));
 
-
 % Beat Stats
+set(handles.pr_median_txt,'String',round(beat_stats.pr_median,0));
+set(handles.pr_min_txt,'String',round(beat_stats.pr_min,0));
+set(handles.pr_max_txt,'String',round(beat_stats.pr_max,0));
+set(handles.pr_iqr_txt,'String',round(beat_stats.pr_iqr,0));
+
 set(handles.qrs_median_txt,'String',round(beat_stats.qrs_median,0));
 set(handles.qrs_min_txt,'String',round(beat_stats.qrs_min,0));
 set(handles.qrs_max_txt,'String',round(beat_stats.qrs_max,0));

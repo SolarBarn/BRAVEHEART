@@ -28,10 +28,11 @@ Z = vcg.Z;
 VM = vcg.VM;
 beatmatrix = beats.beatmatrix();
 
-Q = beatmatrix(:,1);
-R = beatmatrix(:,2);
-S = beatmatrix(:,3);
-Tend = beatmatrix(:,4);
+P = beatmatrix(:,1);
+Q = beatmatrix(:,2);
+R = beatmatrix(:,3);
+S = beatmatrix(:,4);
+Tend = beatmatrix(:,5);
 
 cla(handles.x_axis);
 axes(handles.x_axis);

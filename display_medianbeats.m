@@ -20,7 +20,8 @@
 % This software is for research purposes only and is not intended to diagnose or treat any disease.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function display_medianbeats(median_vcg, beatsig_vcg, medianbeat, max_tvm_value, hObject, eventdata, handles)
+function display_medianbeats(median_vcg, beatsig_vcg, medianbeat, max_pvm_value, ...
+    max_rvm_value, max_tvm_value, hObject, eventdata, handles)
 
 % Load in axes for plotting (VM, X, Y, Z in order)
 A = [handles.VMmedianbeat_axis handles.Xmedianbeat_axis handles.Ymedianbeat_axis handles.Zmedianbeat_axis];
@@ -67,6 +68,12 @@ for j = 1:length(A)
     
     line([0 length(med_signal)],[0 0], 'color', 'k','linewidth',0.5);
     plot(med_signal,'color', colors{j}, 'linewidth',1.5);
+	if ~isnan(max_pvm_value)
+		plot(max_pvm_value, med_signal(max_pvm_value),'*','color','b','MarkerSize', 8);
+	end
+	if ~isnan(max_rvm_value)
+		plot(max_rvm_value, med_signal(max_rvm_value),'*','color','b','MarkerSize', 8);
+	end
 	if ~isnan(max_tvm_value)
 		plot(max_tvm_value, med_signal(max_tvm_value),'*','color','b','MarkerSize', 8);
 	end
